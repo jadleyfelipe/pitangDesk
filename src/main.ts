@@ -4,12 +4,28 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { ValidationPipe, Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({ logger: false }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+
+  // Validação global via class-validator
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Remove campos não declarados no DTO
+      forbidNonWhitelisted: true, // Retorna erro se enviar campo extra
+      transform: true, // Transforma payloads em instâncias de DTO
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  Logger.log(`Application running on port ${port}`, 'Bootstrap');
 }
 bootstrap();
