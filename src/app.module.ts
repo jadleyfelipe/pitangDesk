@@ -4,6 +4,8 @@ import { LoggerModule } from 'nestjs-pino/LoggerModule';
 import { AppController } from './app.controller';
 import { envSchema } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     ConfigModule,
     PrismaModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [],
