@@ -9,6 +9,9 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDTO } from './dto/login.dto';
+import sendEmail from '../../common/helpers/sendgridHelper';
+import { ForgotDTO } from './dto/forgot.dto';
+import { ResetDTO } from './dto/reset.dto';
 
 @Injectable()
 export class AuthService {
@@ -73,6 +76,68 @@ export class AuthService {
       },
       ...tokens,
     };
+  }
+
+  async forgotPassword(dto: ForgotDTO) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      return { message: 'Email não encontrado' };
+    }
+
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetExp = new Date();
+    resetExp.setHours(resetExp.getHours() + 1);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: resetToken,
+        resetPasswordExp: resetExp,
+      },
+    });
+
+    await sendEmail(
+      user.email,
+      'Password Reset',
+      `Your password reset code is: ${resetToken}`,
+      `<p>Your password reset code is: <strong>${resetToken}</strong></p><p>This code expires in 1 hour.</p>`,
+    );
+
+    return { message: 'Código enviado para o email.' };
+  }
+
+  async resetPassword(dto: ResetDTO) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (user?.resetPasswordExp == null || user?.resetPasswordToken == null) {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
+
+    if (
+      !user ||
+      user.resetPasswordToken !== dto.token ||
+      user.resetPasswordExp < new Date()
+    ) {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        resetPasswordToken: null,
+        resetPasswordExp: null,
+      },
+    });
+
+    return { message: 'Password reset successful' };
   }
 
   private async generateTokens(user: {
