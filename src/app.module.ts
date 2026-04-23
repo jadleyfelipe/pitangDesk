@@ -5,7 +5,12 @@ import { AppController } from './app.controller';
 import { envSchema } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { JwtStrategy } from './common/strategies/jwt.strategy';
 import { UsersModule } from './modules/users/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -13,6 +18,13 @@ import { UsersModule } from './modules/users/users.module';
       isGlobal: true,
       validate: (config) => envSchema.parse(config),
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000, // 1 minuto
+        limit: 60, // 60 requests por minuto
+      },
+    ]),
     // Logger estruturado (Pino)
     LoggerModule.forRoot({
       pinoHttp: {
@@ -31,6 +43,11 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [
+    JwtStrategy,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
