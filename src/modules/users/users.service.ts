@@ -134,7 +134,7 @@ export class UsersService {
 
   async delete(id: string, currentUserId: string) {
     if (id === currentUserId) {
-      throw new ForbiddenException('Não é possível desativar a si mesmo');
+      throw new ForbiddenException('Não é possível excluir a si mesmo');
     }
     const validUser = await this.prisma.user.findUnique({
       where: {
