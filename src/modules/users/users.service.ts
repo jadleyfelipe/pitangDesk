@@ -88,7 +88,7 @@ export class UsersService {
     });
 
     if (!validUser) {
-      throw new BadRequestException('Usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     if (validUser.email === dto.email) {
