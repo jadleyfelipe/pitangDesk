@@ -21,7 +21,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ThrottlerModule.forRoot([
       {
         name: 'default',
-        ttl: 60000, // 1 minuto
+        ttl: 60, // 1 minuto
         limit: 60, // 60 requests por minuto
       },
     ]),

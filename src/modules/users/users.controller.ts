@@ -10,12 +10,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CreateUserSchema } from './dto/createUser.dto';
 import type { CreateUserDTO } from './dto/createUser.dto';
+import { UpdateUserSchema } from './dto/updateUser.dto';
 import type { UpdateUserDTO } from './dto/updateUser.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { paginationSchema } from './dto/pagination.dto';
 import type { PaginationDTO } from './dto/pagination.dto';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -29,14 +33,16 @@ export class UsersController {
   @Patch('me')
   updateProfile(
     @CurrentUser() user: UpdateUserDTO,
-    @Body() dto: UpdateUserDTO,
+    @Body(new ZodValidationPipe(UpdateUserSchema)) dto: UpdateUserDTO,
   ) {
     return this.usersService.update(user.id, dto);
   }
 
   @Get()
   @Roles(Role.ADMIN)
-  async findAll(@Query() pagination: PaginationDTO) {
+  async findAll(
+    @Query(new ZodValidationPipe(paginationSchema)) pagination: PaginationDTO,
+  ) {
     return await this.usersService.findAll(pagination);
   }
 
@@ -48,13 +54,18 @@ export class UsersController {
 
   @Post()
   @Roles(Role.ADMIN)
-  async create(@Body() data: CreateUserDTO) {
+  async create(
+    @Body(new ZodValidationPipe(CreateUserSchema)) data: CreateUserDTO,
+  ) {
     return await this.usersService.create(data);
   }
 
   @Put(':id')
   @Roles(Role.ADMIN)
-  async update(@Param('id') id: string, @Body() data: UpdateUserDTO) {
+  async update(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(UpdateUserSchema)) data: UpdateUserDTO,
+  ) {
     return await this.usersService.update(id, data);
   }
 
