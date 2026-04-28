@@ -91,8 +91,19 @@ export class UsersService {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    if (validUser.email === dto.email) {
-      throw new BadRequestException('Email já cadastrado');
+    if (dto.email && dto.email !== validUser.email) {
+      const userWithSameEmail = await this.prisma.user.findFirst({
+        where: {
+          email: dto.email,
+          id: {
+            not: id,
+          },
+        },
+      });
+
+      if (userWithSameEmail) {
+        throw new ConflictException('Email já cadastrado');
+      }
     }
 
     const passwordHash = dto.password
