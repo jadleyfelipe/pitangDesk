@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { randomInt } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -100,12 +101,26 @@ export class AuthService {
       },
     });
 
-    await sendEmail(
-      user.email,
-      'Password Reset',
-      `Your password reset code is: ${resetToken}`,
-      `<p>Your password reset code is: <strong>${resetToken}</strong></p><p>This code expires in 1 hour.</p>`,
-    );
+    try {
+      await sendEmail(
+        user.email,
+        'Password Reset',
+        `Your password reset code is: ${resetToken}`,
+        `<p>Your password reset code is: <strong>${resetToken}</strong></p><p>This code expires in 1 hour.</p>`,
+      );
+    } catch {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetPasswordToken: null,
+          resetPasswordExp: null,
+        },
+      });
+
+      throw new InternalServerErrorException(
+        'Falha ao enviar o email. Tente novamente mais tarde.',
+      );
+    }
 
     return { message: 'Código enviado para o email.' };
   }

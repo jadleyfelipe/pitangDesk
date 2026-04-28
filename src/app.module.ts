@@ -37,7 +37,6 @@ import { RolesGuard } from './common/guards/roles.guard';
         redact: ['req.headers.authorization'], // Nunca loga tokens
       },
     }),
-    ConfigModule,
     PrismaModule,
     AuthModule,
     UsersModule,
