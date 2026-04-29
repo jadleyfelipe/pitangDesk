@@ -1,7 +1,6 @@
 import * as z from 'zod';
 
 export const UpdateUserSchema = z.object({
-  id: z.string().min(1, 'ID é Obrigatório'),
   name: z.string().min(1, 'Nome é Obrigatório').optional(),
   email: z.string().email('Endereço de email inválido').optional(),
   password: z
