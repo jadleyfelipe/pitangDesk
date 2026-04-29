@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
+import { randomInt } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDTO } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
@@ -87,7 +88,7 @@ export class AuthService {
       return { message: 'Email não encontrado' };
     }
 
-    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetToken = (100000 + randomInt(900000)).toString();
     const resetExp = new Date();
     resetExp.setHours(resetExp.getHours() + 1);
 
