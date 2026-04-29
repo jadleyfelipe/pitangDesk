@@ -115,6 +115,7 @@ export class UsersService {
         name: dto.name,
         email: dto.email,
         passwordHash,
+        ...(dto.role && { role: dto.role }),
       },
       select: USER_SELECT,
     });

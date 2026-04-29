@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import type { UpdateUserDTO } from './dto/updateUser.dto';
+import type { UpdateProfileDTO } from './dto/updateUser.dto';
 
 const mockUsersService = {
   findAll: jest.fn(),
@@ -86,7 +87,7 @@ describe('UsersController', () => {
   describe('PUT /users/:id', () => {
     it('should call usersService.update with id and dto', async () => {
       const id = 'uuid-1';
-      const dto: UpdateUserDTO = { id, name: 'Jane' };
+      const dto: UpdateUserDTO = { name: 'Jane' };
       const expected = {
         id,
         name: 'Jane',
@@ -105,8 +106,8 @@ describe('UsersController', () => {
 
   describe('PATCH /users/me', () => {
     it('should call usersService.update with current user id and dto', async () => {
-      const currentUser: UpdateUserDTO = { id: 'uuid-1' };
-      const dto: UpdateUserDTO = { id: 'uuid-1', name: 'Jane' };
+      const currentUser: { id: string } = { id: 'uuid-1' };
+      const dto: UpdateProfileDTO = { name: 'Jane' };
       const expected = {
         id: 'uuid-1',
         name: 'Jane',
@@ -126,7 +127,7 @@ describe('UsersController', () => {
   describe('PATCH /users/deactivate/:id', () => {
     it('should call usersService.deactivate with id and current user id', async () => {
       const id = 'uuid-2';
-      const currentUser: UpdateUserDTO = { id: 'uuid-1' };
+      const currentUser: { id: string } = { id: 'uuid-1' };
       const expected = {
         id,
         name: 'Jane',
@@ -149,7 +150,7 @@ describe('UsersController', () => {
   describe('DELETE /users/:id', () => {
     it('should call usersService.delete with id and current user id', async () => {
       const id = 'uuid-2';
-      const currentUser: UpdateUserDTO = { id: 'uuid-1' };
+      const currentUser: { id: string } = { id: 'uuid-1' };
       const expected = { id };
       mockUsersService.delete.mockResolvedValue(expected);
 

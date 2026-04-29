@@ -14,6 +14,8 @@ import { CreateUserSchema } from './dto/createUser.dto';
 import type { CreateUserDTO } from './dto/createUser.dto';
 import { UpdateUserSchema } from './dto/updateUser.dto';
 import type { UpdateUserDTO } from './dto/updateUser.dto';
+import { UpdateProfileSchema } from './dto/updateUser.dto';
+import type { UpdateProfileDTO } from './dto/updateUser.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
@@ -26,14 +28,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  getProfile(@CurrentUser() user: UpdateUserDTO) {
+  getProfile(@CurrentUser() user: { id: string }) {
     return this.usersService.findById(user.id);
   }
 
   @Patch('me')
   updateProfile(
-    @CurrentUser() user: UpdateUserDTO,
-    @Body(new ZodValidationPipe(UpdateUserSchema)) dto: UpdateUserDTO,
+    @CurrentUser() user: { id: string },
+    @Body(new ZodValidationPipe(UpdateProfileSchema)) dto: UpdateProfileDTO,
   ) {
     return this.usersService.update(user.id, dto);
   }
@@ -73,14 +75,14 @@ export class UsersController {
   @Roles(Role.ADMIN)
   async deactivate(
     @Param('id') id: string,
-    @CurrentUser() user: UpdateUserDTO,
+    @CurrentUser() user: { id: string },
   ) {
     return await this.usersService.deactivate(id, user.id);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async delete(@Param('id') id: string, @CurrentUser() user: UpdateUserDTO) {
+  async delete(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return await this.usersService.delete(id, user.id);
   }
 }
