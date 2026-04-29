@@ -3,7 +3,6 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDTO } from './dto/createUser.dto';
@@ -133,7 +132,7 @@ export class UsersService {
     });
 
     if (!validUser) {
-      throw new BadRequestException('Usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     return this.prisma.user.update({
@@ -154,7 +153,7 @@ export class UsersService {
     });
 
     if (!validUser) {
-      throw new BadRequestException('Usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     return this.prisma.user.delete({
